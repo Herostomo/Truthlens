@@ -17,7 +17,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 // ==== Hugging Face DeepSeek Chat API helper ====
 async function getKey() {
   // ⚠️ For testing only — use chrome.storage.sync in production
-  return "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";
+  return [your hugging face api key];
 }
 
 async function deepSeekAPI(text) {
@@ -93,3 +93,4 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; // async
   }
 });
+
