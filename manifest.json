@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "TruthLens",
+  "version": "0.2.1",
+  "description": "Flags risky signals and helps verify claims with AI and one-click checks using DeepSeek.",
+  "permissions": ["activeTab", "scripting", "storage", "contextMenus"],
+  "host_permissions": [
+    "https://api-inference.huggingface.co/*",
+    "https://router.huggingface.co/*",
+    "https://*/*",
+    "http://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "options_page": "options.html"
+}
