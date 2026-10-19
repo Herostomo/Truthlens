@@ -1,18 +1,30 @@
+
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>TruthLens</title>
-    <link rel="stylesheet" href="popup.css">
-  </head>
-  <body>
-    <h3 id="domain">Domain</h3>
-    <div id="score"></div>
-    <div id="reasons"></div>
-    <hr>
-    <textarea id="aiText" placeholder="Paste a claim to analyze…"></textarea>
-    <button id="aiBtn">AI Analyze</button>
-    <div id="aiOut"></div>
-    <script src="popup.js"></script>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TruthLens</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h3 id="domain">Checking current tab...</h3>
+
+  <div id="score"></div>
+  <div id="reasons"></div>
+
+  <hr>
+
+  <label for="aiText">Claim to analyze</label>
+  <textarea
+    id="aiText"
+    placeholder="Paste a claim to analyze..."
+  ></textarea>
+
+  <button id="aiBtn" type="button">AI Analyze</button>
+
+  <div id="aiOut" role="status" aria-live="polite"></div>
+
+  <script src="popup.js"></script>
+</body>
 </html>

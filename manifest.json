@@ -1,14 +1,17 @@
+
 {
   "manifest_version": 3,
   "name": "TruthLens",
-  "version": "0.2.1",
-  "description": "Flags risky signals and helps verify claims with AI and one-click checks using DeepSeek.",
-  "permissions": ["activeTab", "scripting", "storage", "contextMenus"],
+  "version": "0.3.0",
+  "description": "Analyze potentially misleading claims using a local Qwen model and search for supporting evidence.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "contextMenus"
+  ],
   "host_permissions": [
-    "https://api-inference.huggingface.co/*",
-    "https://router.huggingface.co/*",
-    "https://*/*",
-    "http://*/*"
+    "http://localhost:11434/*"
   ],
   "action": {
     "default_popup": "popup.html"
@@ -18,8 +21,13 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*/*", "http://*/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
