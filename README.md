@@ -1,125 +1,174 @@
-TruthLens – AI-Powered Misinformation Detection Tool
+# TruthLens — Local AI Claim Analysis for Chrome
 
-TruthLens is a Chrome extension designed to help users detect potential misinformation online and verify claims with trusted sources. By combining AI analysis with curated fact-checking links, TruthLens empowers users to think critically and make informed decisions while browsing the web.
+TruthLens is a Chrome extension that helps you assess potentially misleading online claims. It sends a claim to a **local Ollama model** for a preliminary assessment and provides links to search engines and fact-checking websites so you can investigate the claim independently.
 
-Features
+> **Important:** TruthLens is an assistive tool, not an authoritative fact-checker. The local model does not independently browse the web or verify its answer against the linked websites. Check reliable sources before relying on an assessment.
 
-AI Analysis of Claims
+## Features
 
-Paste any text or highlight text on a webpage to let the AI check for misinformation.
+- **Analyze a claim in the extension popup:** Paste a claim into the popup and select **AI Analyze**.
+- **Analyze selected webpage text:** Highlight text, right-click, and select **TruthLens: AI verify selection**.
+- **Local AI processing:** Uses Ollama with `qwen2.5:3b-instruct`; no cloud AI API key is required.
+- **Structured assessments:** Prompts the model to report an assessment of **Supported**, **Contradicted**, or **Uncertain**, followed by an explanation and the evidence needed.
+- **Independent verification links:** Builds claim-specific search links for Google, Bing, Snopes, PolitiFact, AltNews, BOOM Live, and Factly.
+- **In-page results:** Displays selected-text analysis in a small toast notification.
+- **Connection check:** The options page checks whether Ollama is reachable and whether the expected model is installed.
 
-Uses DeepSeek AI model from Hugging Face to provide a yes/no evaluation with a brief explanation.
+## How it works
 
-Context Menu Verification
+1. You enter a claim in the popup or select text on a webpage.
+2. The extension's Manifest V3 service worker sends the claim to Ollama's local chat endpoint at `http://localhost:11434/api/chat`.
+3. Ollama runs `qwen2.5:3b-instruct` and returns a preliminary assessment.
+4. TruthLens displays the model response and creates search links for independent checking. For right-click analysis, a content-script toast displays the result.
 
-Right-click any selected text to instantly analyze it without leaving the page.
+The response prompt instructs the model not to invent citations or claim that it searched the internet when it has not done so. This instruction helps guide the response, but it cannot guarantee that every answer is correct.
 
-Fact-Checking Links
+## Requirements
 
-Generates one-click links to trusted fact-checking sites:
+- Google Chrome or another Chromium-based browser that supports Manifest V3 extensions.
+- [Ollama](https://ollama.com/) installed and running on the same computer as the browser.
+- The model used by the current implementation: `qwen2.5:3b-instruct`.
 
-Snopes
+## Setup
 
-PolitiFact
+### 1. Install and start Ollama
 
-AltNews
+Install Ollama from [ollama.com](https://ollama.com/), then download the model in a terminal:
 
-BoomLive
+```bash
+ollama pull qwen2.5:3b-instruct
+```
 
-Factly
+Make sure Ollama is running and serving its local API at `http://localhost:11434`. Depending on your operating system and installation, Ollama may start automatically. If it does not, start the Ollama application or run:
 
-Includes Google and Bing search links tailored to the claim.
+```bash
+ollama serve
+```
 
-User-Friendly Popup
+Keep the Ollama service running while using TruthLens.
 
-Shows the current website domain for context.
+### 2. Load TruthLens in Chrome
 
-Displays AI results and verification links in a clear, readable interface.
+1. Download or clone this repository and extract it if necessary.
+2. Open `chrome://extensions/` in Chrome.
+3. Enable **Developer mode**.
+4. Select **Load unpacked**.
+5. Choose the project directory containing `manifest.json`.
+6. Pin TruthLens to the browser toolbar for convenient access.
 
-Notifications
+The `manifest.json` references `icons/16.png`, `icons/48.png`, and `icons/128.png`; make sure those icon files are present in the project directory.
 
-Non-intrusive toast notifications display AI results in real-time while browsing.
+### 3. Check the local model connection
 
-API Key Management
+1. Open the extension's options/settings page from Chrome's extension details.
+2. Select **Check Ollama connection**.
+3. A successful check reports that Ollama is reachable and `qwen2.5:3b-instruct` is installed.
 
-Users can securely save their Hugging Face API key in the extension options for seamless AI processing.
+If the model is missing, run `ollama pull qwen2.5:3b-instruct` and check again.
 
-How It Works
+## Usage
 
-Input
+### Analyze text from the popup
 
-Users provide a claim via popup or highlighted text.
+1. Open TruthLens from the Chrome toolbar.
+2. Paste a claim into **Claim to analyze**.
+3. Select **AI Analyze**.
+4. Read the model's assessment and explanation.
+5. Open the generated search or fact-checking links to examine external evidence.
 
-AI Analysis
+### Analyze selected text on a webpage
 
-The text is sent to Hugging Face’s DeepSeek AI model.
+1. Open an ordinary HTTP or HTTPS webpage.
+2. Highlight the text you want to examine.
+3. Right-click the selection.
+4. Select **TruthLens: AI verify selection**.
+5. Read the analysis in the TruthLens toast notification and use the available verification link(s).
 
-The AI evaluates whether the content may be misleading or false.
+Browser-internal pages such as `chrome://` pages generally do not allow content scripts to run, so selection-based analysis may not be available there.
 
-Fact-Checking
+## Project structure
 
-TruthLens generates relevant fact-check links for self-verification.
-
-Results Display
-
-Results are shown in the popup and/or as a toast notification with clear explanations and verification links.
-
-Installation
-
-Clone or download this repository.
-
-Open Chrome and go to chrome://extensions/.
-
-Enable Developer Mode.
-
-Click Load unpacked and select the project folder.
-
-Open the popup and enter your Hugging Face API key in the options page.
-
-Technologies Used
-
-JavaScript / HTML / CSS – Chrome extension front-end and UI.
-
-Chrome Extension APIs – Tabs, storage, context menus, notifications.
-
-Hugging Face DeepSeek API – AI-powered claim analysis.
-
-Toast Notifications – Non-intrusive feedback to the user.
-
-Project Structure
+```text
 TruthLens/
-├── popup.html        # Main UI popup
-├── popup.js          # Popup functionality
-├── options.html      # Options page for API key
-├── options.js        # API key management
-├── content.js        # Injected script for notifications
-├── service_worker.js # Background tasks and context menu
-├── popup.css         # Styling for popup
-├── icons/            # Extension icons
-└── manifest.json     # Chrome extension manifest
+├── manifest.json       # Manifest V3 configuration and permissions
+├── service_worker.js   # Context menu, local Ollama requests, and search links
+├── popup.html          # Extension popup interface
+├── popup.css           # Popup styling
+├── popup.js            # Popup input, results, and verification links
+├── content.js          # In-page toast for selected-text results
+├── options.html        # Settings page and connection-check UI
+├── options.js          # Ollama/model connectivity check
+├── icons/              # Extension icons referenced by manifest.json
+├── LICENSE             # MIT License
+└── README.md           # Project documentation
+```
 
-Usage
+## Configuration
 
-Open any webpage.
+The current model and endpoint are set near the top of `service_worker.js`:
 
-Highlight a claim and right-click → TruthLens: AI verify selection, or open the popup and paste a claim.
+```javascript
+const OLLAMA_URL = "http://localhost:11434/api/chat";
+const OLLAMA_MODEL = "qwen2.5:3b-instruct";
+```
 
-View AI analysis and fact-check links.
+The settings-page connection check in `options.js` also expects the model name `qwen2.5:3b-instruct`. If you change the model, update both locations so the analysis and connection check remain consistent. The extension does not currently provide a UI control for changing the model.
 
-Click links to verify information using trusted sources.
+## Privacy and data handling
 
-Contribution
+- **Claim analysis:** The claim text is sent to the Ollama API running on your own computer at `localhost`.
+- **No cloud AI key:** The current implementation does not call the previously described Hugging Face/DeepSeek API and does not require a cloud AI API key.
+- **External verification:** The generated Google, Bing, and fact-checking links include the claim or a shortened quoted version of it in the URL. Opening one of these links sends the query to that external website according to its own policies.
+- **Browser permissions:** The extension declares `activeTab`, `scripting`, `storage`, and `contextMenus` permissions and allows connection to `http://localhost:11434/*`. The current supplied code does not store a user API key.
 
-Contributions are welcome! You can:
+Review the source code and browser permission prompts before installing any extension.
 
-Improve the UI/UX
+## Troubleshooting
 
-Add more fact-checking sources
+**“Could not connect to Ollama”**
 
-Optimize AI queries for faster results
+- Confirm Ollama is installed and running.
+- Open `http://localhost:11434/api/tags` in your browser or use the settings page's connection check.
+- Confirm the extension is configured for `http://localhost:11434` and that local security software is not blocking the connection.
 
-Please open a pull request or issue for suggestions.
+**“The expected model was not found”**
 
-License
+Run:
 
-MIT License – free to use and modify.
+```bash
+ollama pull qwen2.5:3b-instruct
+```
+
+Then retry the connection check.
+
+**The popup shows an AI error or no response**
+
+- Confirm the Ollama service is still running.
+- Check that the model is available with `ollama list`.
+- Open `chrome://extensions/`, find TruthLens, and inspect its service worker or extension errors for additional details.
+
+**Right-click analysis does not show a toast**
+
+- Test on a normal HTTP or HTTPS webpage rather than a browser-internal page.
+- Reload the webpage after installing or reloading the extension.
+- Open the extension details and inspect errors if the problem continues.
+
+## Limitations and responsible use
+
+- The model's assessment is based on its generated response and existing model knowledge; the extension does not automatically verify claims against live web content.
+- Search links are provided for manual investigation. They are not proof that a claim is true or false.
+- Results can be incomplete, outdated, or incorrect. For consequential claims, consult original documents, reputable reporting, and relevant subject-matter experts.
+- The popup displays the active tab's domain for context, but the current implementation does not automatically extract and analyze the webpage's full contents.
+
+## Contributing
+
+Contributions are welcome. Useful areas include improving the interface, strengthening error handling, adding verification sources, improving accessibility, and refining the analysis prompt.
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Make and test your changes locally.
+4. Open a pull request describing the change.
+
+## License
+
+This project is distributed under the MIT License. See [`LICENSE`](LICENSE) for the full text.
